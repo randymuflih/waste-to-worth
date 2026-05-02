@@ -1,0 +1,258 @@
+// Waste to Worth — Prisma Schema
+// E-waste circular management platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── USER & AUTH ────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  role          Role     @default(CITIZEN)
+  phone         String?
+  pointsBalance Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  submissions         Submission[]
+  pointTransactions   PointTransaction[]
+  redemptions         Redemption[]
+  verifiedSubmissions Submission[]       @relation("VerifiedBy")
+}
+
+enum Role {
+  CITIZEN
+  ADMIN
+}
+
+// ─── GEOGRAPHY ──────────────────────────────────────────────────
+
+model District {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  pickupSchedules         PickupSchedule[]
+  pickupSubmissionDetails PickupSubmissionDetail[]
+}
+
+model DropboxLocation {
+  id              String   @id @default(cuid())
+  name            String
+  address         String
+  lat             Float
+  lng             Float
+  qrCode          String   @unique
+  maxCapacity     Int      @default(20)
+  currentBoxCount Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  boxes                    Box[]
+  dropboxSubmissionDetails DropboxSubmissionDetail[]
+  batches                  Batch[]
+}
+
+model Box {
+  id          String   @id @default(cuid())
+  boxNumber   String   @unique
+  dropboxId   String
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  dropbox                  DropboxLocation          @relation(fields: [dropboxId], references: [id])
+  dropboxSubmissionDetails DropboxSubmissionDetail[]
+}
+
+// ─── SCHEDULING ─────────────────────────────────────────────────
+
+model PickupSchedule {
+  id            String         @id @default(cuid())
+  districtId    String
+  scheduledDate DateTime
+  status        ScheduleStatus @default(UPCOMING)
+  createdAt     DateTime       @default(now())
+
+  district                District                 @relation(fields: [districtId], references: [id])
+  pickupSubmissionDetails PickupSubmissionDetail[]
+  batches                 Batch[]
+}
+
+enum ScheduleStatus {
+  UPCOMING
+  IN_PROGRESS
+  COMPLETED
+}
+
+// ─── BATCHES ────────────────────────────────────────────────────
+
+model Batch {
+  id               String      @id @default(cuid())
+  type             BatchType
+  dropboxId        String?
+  pickupScheduleId String?
+  status           BatchStatus @default(OPEN)
+  collectedAt      DateTime?
+  createdAt        DateTime    @default(now())
+
+  dropbox        DropboxLocation? @relation(fields: [dropboxId], references: [id])
+  pickupSchedule PickupSchedule?  @relation(fields: [pickupScheduleId], references: [id])
+  submissions    Submission[]
+}
+
+enum BatchType {
+  DROPBOX
+  PICKUP
+}
+
+enum BatchStatus {
+  OPEN
+  COLLECTING
+  VERIFYING
+  COMPLETED
+}
+
+// ─── SUBMISSIONS ────────────────────────────────────────────────
+
+model Submission {
+  id                String           @id @default(cuid())
+  userId            String
+  batchId           String
+  method            SubmissionMethod
+  status            SubmissionStatus @default(PENDING)
+  totalPointsEarned Int              @default(0)
+  submittedAt       DateTime         @default(now())
+  verifiedAt        DateTime?
+  verifiedBy        String?
+  notes             String?
+
+  user                    User                    @relation(fields: [userId], references: [id])
+  batch                   Batch                   @relation(fields: [batchId], references: [id])
+  verifier                User?                   @relation("VerifiedBy", fields: [verifiedBy], references: [id])
+  submissionItems         SubmissionItem[]
+  dropboxSubmissionDetail DropboxSubmissionDetail?
+  pickupSubmissionDetail  PickupSubmissionDetail?
+  pointTransactions       PointTransaction[]
+}
+
+enum SubmissionMethod {
+  DROPBOX
+  PICKUP
+}
+
+enum SubmissionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model SubmissionItem {
+  id           String   @id @default(cuid())
+  submissionId String
+  itemType     String
+  quantity     Int
+  weightKg     Float?
+  pointsEarned Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+}
+
+model DropboxSubmissionDetail {
+  id           String   @id @default(cuid())
+  submissionId String   @unique
+  dropboxId    String
+  boxId        String
+  createdAt    DateTime @default(now())
+
+  submission Submission      @relation(fields: [submissionId], references: [id])
+  dropbox    DropboxLocation @relation(fields: [dropboxId], references: [id])
+  box        Box             @relation(fields: [boxId], references: [id])
+}
+
+model PickupSubmissionDetail {
+  id               String   @id @default(cuid())
+  submissionId     String   @unique
+  pickupScheduleId String
+  address          String
+  districtId       String
+  createdAt        DateTime @default(now())
+
+  submission     Submission     @relation(fields: [submissionId], references: [id])
+  pickupSchedule PickupSchedule @relation(fields: [pickupScheduleId], references: [id])
+  district       District       @relation(fields: [districtId], references: [id])
+}
+
+// ─── POINTS ─────────────────────────────────────────────────────
+
+model PointRule {
+  id          String   @id @default(cuid())
+  itemType    String   @unique
+  pointsPerKg Int
+  createdAt   DateTime @default(now())
+}
+
+model PointTransaction {
+  id          String          @id @default(cuid())
+  userId      String
+  amount      Int
+  type        TransactionType
+  referenceId String?
+  createdAt   DateTime        @default(now())
+
+  user       User        @relation(fields: [userId], references: [id])
+  submission Submission? @relation(fields: [referenceId], references: [id])
+}
+
+enum TransactionType {
+  EARN
+  REDEEM
+}
+
+// ─── REWARDS ────────────────────────────────────────────────────
+
+model Reward {
+  id             String     @id @default(cuid())
+  name           String
+  type           RewardType
+  pointsRequired Int
+  stock          Int        @default(0)
+  isActive       Boolean    @default(true)
+  bengkelName    String?
+  bengkelAddress String?
+  bengkelPhone   String?
+  createdAt      DateTime   @default(now())
+
+  redemptions Redemption[]
+}
+
+enum RewardType {
+  TOKEN_LISTRIK
+  TRANSUM
+  VOUCHER_BENGKEL
+}
+
+model Redemption {
+  id         String           @id @default(cuid())
+  userId     String
+  rewardId   String
+  status     RedemptionStatus @default(PENDING)
+  rewardCode String?
+  createdAt  DateTime         @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  reward Reward @relation(fields: [rewardId], references: [id])
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  DELIVERED
+}
