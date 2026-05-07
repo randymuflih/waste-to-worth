@@ -313,7 +313,6 @@ export default function RewardsPage() {
               ) : (
                 <div className="space-y-2">
                   {redemptions.slice(0, 4).map((rd) => {
-                    const meta = REWARD_META[rd.reward.type] || REWARD_META.TOKEN_LISTRIK;
                     return (
                       <div key={rd.id} className="rounded-xl border bg-white p-4">
                         <div className="flex items-center justify-between mb-1">
