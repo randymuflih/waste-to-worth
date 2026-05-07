@@ -27,14 +27,17 @@ export async function GET(request: NextRequest) {
       orderBy: { submittedAt: "desc" },
     });
 
-    // Stats
-    const inVerification = submissions.filter((s) => s.status === "PENDING").length;
-    const completed = submissions.filter((s) => s.status === "VERIFIED").length;
-    const pendingPoints = submissions
-      .filter((s) => s.status === "PENDING")
-      .reduce((sum, s) => sum + s.totalPointsEarned, 0);
+    type Sub = (typeof submissions)[number];
+    type SubItem = Sub["submissionItems"][number];
 
-    const data = submissions.map((s) => ({
+    // Stats
+    const inVerification = submissions.filter((s: Sub) => s.status === "PENDING").length;
+    const completed = submissions.filter((s: Sub) => s.status === "VERIFIED").length;
+    const pendingPoints = submissions
+      .filter((s: Sub) => s.status === "PENDING")
+      .reduce((sum: number, s: Sub) => sum + s.totalPointsEarned, 0);
+
+    const data = submissions.map((s: Sub) => ({
       id: s.id,
       method: s.method,
       status: s.status,
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest) {
       batchId: s.batchId,
       batchStatus: s.batch?.status || null,
       batchCollectedAt: s.batch?.collectedAt || null,
-      items: s.submissionItems.map((item) => ({
+      items: s.submissionItems.map((item: SubItem) => ({
         itemType: item.itemType,
         quantity: item.quantity,
         weightKg: item.weightKg,

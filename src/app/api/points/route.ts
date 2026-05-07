@@ -26,14 +26,16 @@ export async function GET(request: NextRequest) {
       take: 50,
     });
 
+    type Tx = (typeof transactions)[number];
+
     // Calculate totals
     const totalEarned = transactions
-      .filter((t) => t.type === "EARN")
-      .reduce((sum, t) => sum + t.amount, 0);
+      .filter((t: Tx) => t.type === "EARN")
+      .reduce((sum: number, t: Tx) => sum + t.amount, 0);
 
     const totalRedeemed = transactions
-      .filter((t) => t.type === "REDEEM")
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .filter((t: Tx) => t.type === "REDEEM")
+      .reduce((sum: number, t: Tx) => sum + Math.abs(t.amount), 0);
 
     return NextResponse.json({
       data: {

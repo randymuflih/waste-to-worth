@@ -28,13 +28,16 @@ export async function GET() {
       orderBy: { name: "asc" },
     });
 
+    type DB = (typeof dropboxes)[number];
+    type BoxItem = DB["boxes"][number];
+
     // Add capacity info
-    const data = dropboxes.map((d) => ({
+    const data = dropboxes.map((d: DB) => ({
       ...d,
       capacityPercent: Math.round((d.currentBoxCount / d.maxCapacity) * 100),
       isFull: d.currentBoxCount >= d.maxCapacity,
       isWarning: d.currentBoxCount >= d.maxCapacity * 0.75,
-      availableBoxes: d.boxes.filter((b) => b.isAvailable),
+      availableBoxes: d.boxes.filter((b: BoxItem) => b.isAvailable),
     }));
 
     return NextResponse.json({ data });

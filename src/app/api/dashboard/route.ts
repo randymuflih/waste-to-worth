@@ -107,10 +107,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const districtStats = districtActivity.map((d) => {
-      const totalKg = d.pickupSubmissionDetails.reduce((sum, psd) => {
+    type DistAct = (typeof districtActivity)[number];
+    type DPSD = DistAct["pickupSubmissionDetails"][number];
+    type DSItem = DPSD["submission"]["submissionItems"][number];
+    type ActiveSub = (typeof activeSubmissions)[number];
+    type ActiveSubItem = ActiveSub["submissionItems"][number];
+
+    const districtStats = districtActivity.map((d: DistAct) => {
+      const totalKg = d.pickupSubmissionDetails.reduce((sum: number, psd: DPSD) => {
         const itemWeight = psd.submission.submissionItems.reduce(
-          (s, item) => s + (item.weightKg || 0),
+          (s: number, item: DSItem) => s + (item.weightKg || 0),
           0
         );
         return sum + itemWeight;
@@ -134,13 +140,13 @@ export async function GET(request: NextRequest) {
         activeSubmissions: activeCount,
         personalImpactKg: Math.round((personalImpact._sum.weightKg || 0) * 10) / 10,
       },
-      activeSubmissions: activeSubmissions.map((s) => ({
+      activeSubmissions: activeSubmissions.map((s: ActiveSub) => ({
         id: s.id,
         method: s.method,
         status: s.status,
         submittedAt: s.submittedAt,
         batchStatus: s.batch?.status || null,
-        items: s.submissionItems.map((item) => ({
+        items: s.submissionItems.map((item: ActiveSubItem) => ({
           itemType: item.itemType,
           quantity: item.quantity,
           weightKg: item.weightKg,

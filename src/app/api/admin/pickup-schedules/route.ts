@@ -27,14 +27,17 @@ export async function GET(request: NextRequest) {
       orderBy: { scheduledDate: "desc" },
     });
 
-    const data = schedules.map((s) => ({
+    type ScheduleWithDetails = (typeof schedules)[number];
+    type DetailWithSubmission = ScheduleWithDetails["pickupSubmissionDetails"][number];
+
+    const data = schedules.map((s: ScheduleWithDetails) => ({
       id: s.id,
       districtId: s.districtId,
       districtName: s.district.name,
       scheduledDate: s.scheduledDate,
       status: s.status,
       createdAt: s.createdAt,
-      registrations: s.pickupSubmissionDetails.map((d) => ({
+      registrations: s.pickupSubmissionDetails.map((d: DetailWithSubmission) => ({
         id: d.id,
         address: d.address,
         submissionId: d.submissionId,

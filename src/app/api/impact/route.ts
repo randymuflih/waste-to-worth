@@ -43,15 +43,19 @@ export async function GET() {
       },
     });
 
-    const districtBreakdown = districts.map((d) => {
+    type Dist = (typeof districts)[number];
+    type PSD = Dist["pickupSubmissionDetails"][number];
+    type SItem = PSD["submission"]["submissionItems"][number];
+
+    const districtBreakdown = districts.map((d: Dist) => {
       const verifiedSubmissions = d.pickupSubmissionDetails.filter(
-        (psd) => psd.submission.status === "VERIFIED"
+        (psd: PSD) => psd.submission.status === "VERIFIED"
       );
-      const totalWeight = verifiedSubmissions.reduce((sum, psd) => {
+      const totalWeight = verifiedSubmissions.reduce((sum: number, psd: PSD) => {
         return (
           sum +
           psd.submission.submissionItems.reduce(
-            (s, item) => s + (item.weightKg || 0),
+            (s: number, item: SItem) => s + (item.weightKg || 0),
             0
           )
         );
