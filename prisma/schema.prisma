@@ -25,6 +25,9 @@ model User {
   pointTransactions   PointTransaction[]
   redemptions         Redemption[]
   verifiedSubmissions Submission[]       @relation("VerifiedBy")
+
+  districtId String?
+  district   District? @relation(fields: [districtId], references: [id])
 }
 
 enum Role {
@@ -41,6 +44,8 @@ model District {
 
   pickupSchedules         PickupSchedule[]
   pickupSubmissionDetails PickupSubmissionDetail[]
+  users                   User[]
+  dropboxLocations        DropboxLocation[]
 }
 
 model DropboxLocation {
@@ -58,6 +63,8 @@ model DropboxLocation {
   boxes                    Box[]
   dropboxSubmissionDetails DropboxSubmissionDetail[]
   batches                  Batch[]
+  districtId               String
+  district                 District @relation(fields: [districtId], references: [id])
 }
 
 model Box {

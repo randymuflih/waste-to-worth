@@ -46,6 +46,7 @@ async function main() {
       lat: -5.1324,
       lng: 119.4881,
       qrCode: "WTW-MKS01",
+      districtId: "tamalanrea",
     },
     {
       id: "dropbox-mks02",
@@ -54,13 +55,14 @@ async function main() {
       lat: -5.1523,
       lng: 119.4384,
       qrCode: "WTW-MKS02",
+      districtId: "panakkukang",
     },
   ];
 
   for (const dropbox of dropboxes) {
     await prisma.dropboxLocation.upsert({
       where: { id: dropbox.id },
-      update: {},
+      update: { districtId: dropbox.districtId },
       create: dropbox,
     });
   }
@@ -138,20 +140,80 @@ async function main() {
   }
   console.log(`✅ Seeded ${rewards.length} rewards`);
 
-  // ─── Admin User ───────────────────────────────────────────────
+  // ─── District Admins ──────────────────────────────────────────
   const hashedPassword = await bcrypt.hash("admin123", 12);
-  await prisma.user.upsert({
-    where: { email: "admin@waste2worth.id" },
-    update: {},
-    create: {
-      name: "Admin Waste2Worth",
-      email: "admin@waste2worth.id",
-      password: hashedPassword,
-      role: "ADMIN",
-      phone: "08110000001",
+  const adminData = [
+    {
+      name: "Admin Tamalanrea",
+      email: "admin.tamalanrea@waste2worth.id",
+      districtId: "tamalanrea",
     },
-  });
-  console.log("✅ Seeded admin user (admin@waste2worth.id)");
+    {
+      name: "Admin Panakkukang",
+      email: "admin.panakkukang@waste2worth.id",
+      districtId: "panakkukang",
+    },
+    {
+      name: "Admin Rappocini",
+      email: "admin.rappocini@waste2worth.id",
+      districtId: "rappocini",
+    },
+  ];
+
+  for (const admin of adminData) {
+    await prisma.user.upsert({
+      where: { email: admin.email },
+      update: { districtId: admin.districtId },
+      create: {
+        name: admin.name,
+        email: admin.email,
+        password: hashedPassword,
+        role: "ADMIN",
+        districtId: admin.districtId,
+        phone: `0811000000${adminData.indexOf(admin) + 1}`,
+      },
+    });
+  }
+  console.log(`✅ Seeded ${adminData.length} district admins`);
+
+  // ─── Regular Users (Citizens/Students) ────────────────────────
+  const usersData = [
+    {
+      name: "Budi Mahasiswa",
+      email: "budi@student.unhas.ac.id",
+      districtId: "tamalanrea",
+      phone: "081234567890",
+    },
+    {
+      name: "Siti Pengguna",
+      email: "siti@gmail.com",
+      districtId: "panakkukang",
+      phone: "081234567891",
+    },
+    {
+      name: "Andi Umum",
+      email: "andi@outlook.com",
+      districtId: null,
+      phone: "081234567892",
+    },
+  ];
+
+  for (const user of usersData) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: { districtId: user.districtId },
+      create: {
+        name: user.name,
+        email: user.email,
+        password: hashedPassword, // admin123
+        role: "CITIZEN",
+        districtId: user.districtId,
+        phone: user.phone,
+        pointsBalance: 100, // Beri saldo awal 100 poin untuk testing
+      },
+    });
+  }
+  console.log(`✅ Seeded ${usersData.length} regular users`);
 
   console.log("\n🎉 Seed completed successfully!");
 }
