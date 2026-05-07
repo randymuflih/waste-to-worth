@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SidebarCitizen } from "@/components/citizen/SidebarCitizen";
 import { DropboxForm } from "@/components/citizen/submit/DropboxForm";
@@ -27,6 +27,14 @@ interface SubmissionResult {
 }
 
 export default function DropboxSubmitPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen" style={{ background: "#F8FAF9" }}><SidebarCitizen /><main className="flex-1 ml-64 min-h-screen flex items-center justify-center"><p className="text-gray-400">Loading...</p></main></div>}>
+      <DropboxSubmitContent />
+    </Suspense>
+  );
+}
+
+function DropboxSubmitContent() {
   const searchParams = useSearchParams();
   const qrDropboxId = searchParams.get("dropboxId") || "";
 
