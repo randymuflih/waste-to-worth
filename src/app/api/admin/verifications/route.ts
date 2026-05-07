@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     const districts = await prisma.district.findMany({
       select: { name: true },
     });
-    const districtKeys = districts.map((district) => normalizeText(district.name));
+    const districtKeys = districts.map((district: { name: string }) => normalizeText(district.name));
     const adminDistrictScope = getAdminDistrictScopeFromEmail(authUser.email);
     if (!adminDistrictScope) {
       return NextResponse.json(
@@ -83,7 +83,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const scopedPendingSubmissions = pendingSubmissions.filter((submission) => {
+    type PendingSub = (typeof pendingSubmissions)[number];
+    const scopedPendingSubmissions = pendingSubmissions.filter((submission: PendingSub) => {
       const submissionDistrict = getSubmissionDistrictKey(submission, districtKeys);
       return submissionDistrict === adminDistrictScope;
     });
@@ -91,8 +92,9 @@ export async function GET(request: NextRequest) {
     const pointRules = await prisma.pointRule.findMany({
       select: { itemType: true, pointsPerKg: true },
     });
+    type PRule = (typeof pointRules)[number];
     const pointRulesMap = Object.fromEntries(
-      pointRules.map((rule) => [rule.itemType.toLowerCase(), rule.pointsPerKg])
+      pointRules.map((rule: PRule) => [rule.itemType.toLowerCase(), rule.pointsPerKg])
     );
 
     return NextResponse.json({
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
     const districts = await prisma.district.findMany({
       select: { name: true },
     });
-    const districtKeys = districts.map((district) => normalizeText(district.name));
+    const districtKeys = districts.map((district: { name: string }) => normalizeText(district.name));
     const adminDistrictScope = getAdminDistrictScopeFromEmail(authUser.email);
     if (!adminDistrictScope) {
       return NextResponse.json(
@@ -206,18 +208,18 @@ export async function POST(request: NextRequest) {
     }
 
     const itemWeightsMap = new Map(
-      itemWeights.map((item) => [item.itemId, Number(item.weightKg)])
+      itemWeights.map((item: { itemId: string; weightKg: number }) => [item.itemId, Number(item.weightKg)])
     );
 
     const pointRules = await prisma.pointRule.findMany({
       select: { itemType: true, pointsPerKg: true },
     });
     const ruleMap = new Map(
-      pointRules.map((rule) => [rule.itemType.toLowerCase(), rule.pointsPerKg])
+      pointRules.map((rule: { itemType: string; pointsPerKg: number }) => [rule.itemType.toLowerCase(), rule.pointsPerKg])
     );
 
     const unknownRuleItem = submission.submissionItems.find(
-      (item) => !ruleMap.has(item.itemType.toLowerCase())
+      (item: { itemType: string }) => !ruleMap.has(item.itemType.toLowerCase())
     );
     if (unknownRuleItem) {
       return NextResponse.json(
