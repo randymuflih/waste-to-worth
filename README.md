@@ -45,12 +45,12 @@ cd waste-to-worth
 npm install
 ```
 
-### 3. Konfigurasi Environment Variables
+### 3. Konfigurasi Environment Variables -> kebutuhan run lokal
 Buat file `.env` di root direktori dan masukkan kredensial database Anda:
 ```env
-DATABASE_URL="your_postgresql_url"
-DIRECT_URL="your_direct_url" # Diperlukan untuk migrasi prisma
-JWT_SECRET="your_secret_key"
+DATABASE_URL="postgresql://postgres.nuikxdfkogtbnfmaxgjz:hrzsVNxT123@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.nuikxdfkogtbnfmaxgjz:hrzsVNxT123@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+JWT_SECRET="waste-to-worth-jwt-secret-2026"
 ```
 
 ### 4. Setup Database & Seeding
