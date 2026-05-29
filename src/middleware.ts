@@ -27,58 +27,7 @@ async function verifyJWT(token: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const token = request.cookies.get("token")?.value;
-
-  // ── Public routes: allow through ──────────────────────────────
-  if (
-    pathname === "/" ||
-    pathname.startsWith("/impact") ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
-  ) {
-    return NextResponse.next();
-  }
-
-  // ── No token → redirect to login ─────────────────────────────
-  if (!token) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // ── Verify token ─────────────────────────────────────────────
-  const payload = await verifyJWT(token);
-
-  if (!payload) {
-    const loginUrl = new URL("/login", request.url);
-    const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete("token");
-    return response;
-  }
-
-  // ── Admin routes: require ADMIN role ──────────────────────────
-  if (pathname.startsWith("/admin")) {
-    if (payload.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
-  // ── Citizen routes: require any authenticated role ────────────
-  if (
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/submit") ||
-    pathname.startsWith("/history") ||
-    pathname.startsWith("/rewards")
-  ) {
-    if (!payload.role) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-  }
-
+  // Auth bypass: allow all routes without login (temporary for frontend demo)
   return NextResponse.next();
 }
 
