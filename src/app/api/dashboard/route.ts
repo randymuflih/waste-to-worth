@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Sort by totalKg descending
-    districtStats.sort((a, b) => b.totalKg - a.totalKg);
+    districtStats.sort((a: { name: string; totalKg: number }, b: { name: string; totalKg: number }) => b.totalKg - a.totalKg);
 
     return NextResponse.json({
       user: {
