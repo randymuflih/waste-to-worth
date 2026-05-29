@@ -220,7 +220,41 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs mt-5" style={{ color: "#8BAF9E" }}>
+        <div className="mt-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 h-px" style={{ background: "#E5EDE9" }} />
+            <span className="text-xs" style={{ color: "#8BAF9E" }}>atau akses demo</span>
+            <div className="flex-1 h-px" style={{ background: "#E5EDE9" }} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard")}
+              className="py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+              style={{
+                background: "rgba(22,196,127,0.08)",
+                color: "#16C47F",
+                border: "1.5px solid #16C47F",
+              }}
+            >
+              🏠 Demo User
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/admin/dashboard")}
+              className="py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+              style={{
+                background: "rgba(52,152,219,0.08)",
+                color: "#3498DB",
+                border: "1.5px solid #3498DB",
+              }}
+            >
+              🛡️ Demo Admin
+            </button>
+          </div>
+        </div>
+
+        <p className="text-center text-xs mt-4" style={{ color: "#8BAF9E" }}>
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
