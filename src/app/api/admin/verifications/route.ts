@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
         if (typeof weightKg !== "number" || weightKg <= 0) {
           throw new Error(`Invalid weight for item '${item.itemType}'`);
         }
-        const pointsPerKg = ruleMap.get(item.itemType.toLowerCase()) || 0;
+        const pointsPerKg = (ruleMap.get(item.itemType.toLowerCase()) ?? 0) as number;
         const earnedPoints = Math.floor(pointsPerKg * weightKg);
         totalPoints += earnedPoints;
 
