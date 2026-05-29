@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 
@@ -231,7 +230,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const verified = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const verified = await prisma.$transaction(async (tx: any) => {
       let totalPoints = 0;
 
       for (const item of submission.submissionItems) {
