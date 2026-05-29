@@ -155,7 +155,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create redemption in a transaction
-    const redemption = await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const redemption = await prisma.$transaction(async (tx: any) => {
       // Deduct points
       await tx.user.update({
         where: { id: user.userId },

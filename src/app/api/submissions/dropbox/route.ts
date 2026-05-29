@@ -117,7 +117,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create submission with items in a transaction
-    const submission = await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const submission = await prisma.$transaction(async (tx: any) => {
       // Create the submission
       const sub = await tx.submission.create({
         data: {
