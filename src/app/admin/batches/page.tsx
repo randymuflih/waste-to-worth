@@ -63,6 +63,7 @@ export default function AdminPickupPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData(); }, []);
 
   const handleCreate = async () => {
